@@ -14,6 +14,16 @@ import { EVENTS, TYPE_COLORS, type NewsEvent } from "@/data/events";
 // with ssr: false ("ssr" = server-side rendering).
 const GlobeGL = dynamic(() => import("react-globe.gl"), { ssr: false });
 
+// Turn a hex color like "#ff3b30" into a see-through "rgba" color.
+// alpha 1 = fully solid, 0 = fully invisible. We use this to fade each
+// ripple out as it spreads, so it looks like a glow softening into space.
+function hexToRgba(hex: string, alpha: number) {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export default function Globe() {
   // A "remote control" handle to the globe, so we can tell it to spin.
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
@@ -73,6 +83,19 @@ export default function Globe() {
       pointAltitude={(d) => (d as NewsEvent).severity * 0.06} // taller = worse
       pointRadius={(d) => 0.25 + (d as NewsEvent).severity * 0.04} // wider = worse
       pointResolution={12} // how round each dot looks
+      // === The pulsing ripples (the "breathing" effect) ===
+      ringsData={EVENTS} // one set of ripples per event
+      ringLat={(d) => (d as NewsEvent).lat}
+      ringLng={(d) => (d as NewsEvent).lng}
+      // Each ripple starts bright and fades to invisible as it grows (t: 0→1).
+      ringColor={(d) => {
+        const color = TYPE_COLORS[(d as NewsEvent).type];
+        return (t: number) => hexToRgba(color, 1 - t);
+      }}
+      ringMaxRadius={(d) => 2 + (d as NewsEvent).severity * 0.5} // bigger = worse
+      ringPropagationSpeed={3} // how fast each ripple spreads
+      // More severe events pulse more often (smaller gap between ripples).
+      ringRepeatPeriod={(d) => 2000 - (d as NewsEvent).severity * 130}
     />
   );
 }
