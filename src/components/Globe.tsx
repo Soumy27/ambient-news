@@ -29,6 +29,29 @@ export default function Globe() {
     return () => window.removeEventListener("resize", updateSize);
   }, []);
 
+  // Start the globe gently spinning. We keep checking every animation frame
+  // until the globe's controls exist, then switch on auto-rotation. Because
+  // this lives in useEffect, it re-applies on every reload (unlike the
+  // one-time onGlobeReady), so the spin never gets "stuck off".
+  useEffect(() => {
+    let frameId: number;
+    const startSpinning = () => {
+      const globe = globeRef.current;
+      if (globe && globe.controls()) {
+        const controls = globe.controls();
+        controls.autoRotate = true; // spin by itself
+        controls.autoRotateSpeed = 0.8; // calm, clearly-visible speed
+        controls.enableZoom = true; // let the user scroll to zoom
+        globe.pointOfView({ altitude: 2.4 }); // starting zoom level
+      } else {
+        // Not ready yet — try again on the next frame.
+        frameId = requestAnimationFrame(startSpinning);
+      }
+    };
+    startSpinning();
+    return () => cancelAnimationFrame(frameId);
+  }, []);
+
   return (
     <GlobeGL
       ref={globeRef}
@@ -41,15 +64,6 @@ export default function Globe() {
       showAtmosphere={true}
       atmosphereColor="#3a7bd5"
       atmosphereAltitude={0.18}
-      // When the globe is ready, start it gently spinning and set the zoom.
-      onGlobeReady={() => {
-        if (!globeRef.current) return;
-        const controls = globeRef.current.controls();
-        controls.autoRotate = true; // spin by itself
-        controls.autoRotateSpeed = 0.6; // slow, calm speed
-        controls.enableZoom = true; // let the user scroll to zoom
-        globeRef.current.pointOfView({ altitude: 2.4 }); // starting zoom level
-      }}
     />
   );
 }
