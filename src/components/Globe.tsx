@@ -24,7 +24,12 @@ function hexToRgba(hex: string, alpha: number) {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default function Globe() {
+// The settings (props) this component accepts from its parent.
+type GlobeProps = {
+  onSelect: (event: NewsEvent) => void; // called when a beacon is clicked
+};
+
+export default function Globe({ onSelect }: GlobeProps) {
   // A "remote control" handle to the globe, so we can tell it to spin.
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
 
@@ -83,6 +88,8 @@ export default function Globe() {
       pointAltitude={(d) => (d as NewsEvent).severity * 0.06} // taller = worse
       pointRadius={(d) => 0.25 + (d as NewsEvent).severity * 0.04} // wider = worse
       pointResolution={12} // how round each dot looks
+      onPointClick={(point) => onSelect(point as NewsEvent)} // report the click up
+      pointLabel={(d) => (d as NewsEvent).city} // tooltip on hover
       // === The pulsing ripples (the "breathing" effect) ===
       ringsData={EVENTS} // one set of ripples per event
       ringLat={(d) => (d as NewsEvent).lat}
