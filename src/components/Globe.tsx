@@ -7,6 +7,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { GlobeMethods } from "react-globe.gl";
+import { EVENTS, TYPE_COLORS, type NewsEvent } from "@/data/events";
 
 // react-globe.gl uses the browser's `window`, which doesn't exist on the
 // server. So we load it lazily and tell Next.js: "only in the browser"
@@ -64,6 +65,14 @@ export default function Globe() {
       showAtmosphere={true}
       atmosphereColor="#3a7bd5"
       atmosphereAltitude={0.18}
+      // === The glowing news dots ===
+      pointsData={EVENTS} // the list of events to plot
+      pointLat={(d) => (d as NewsEvent).lat} // where (north/south)
+      pointLng={(d) => (d as NewsEvent).lng} // where (east/west)
+      pointColor={(d) => TYPE_COLORS[(d as NewsEvent).type]} // red/green/blue
+      pointAltitude={(d) => (d as NewsEvent).severity * 0.06} // taller = worse
+      pointRadius={(d) => 0.25 + (d as NewsEvent).severity * 0.04} // wider = worse
+      pointResolution={12} // how round each dot looks
     />
   );
 }
