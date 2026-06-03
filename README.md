@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🌍 Ambient News — The World as a Living Map
 
-## Getting Started
+Instead of a list of headlines, **Ambient News** shows the world as a glowing,
+breathing organism. Each region pulses with what's happening there right now:
 
-First, run the development server:
+- 🔴 **Conflict** — wars, attacks, unrest, politics
+- 🟢 **Economy** — markets, business, trade, technology
+- 🔵 **Nature** — disasters, weather, climate, health
+
+The brighter and faster a region pulses, the more severe the event. Click any
+glowing region to read an AI-written summary and jump to the full story.
+
+## ✨ Features
+
+- **Interactive 3D globe** — a spinning, glowing Earth you can drag and zoom
+- **Live news** — pulled from free RSS feeds (BBC regions, Al Jazeera, NYT, The Guardian)
+- **AI understanding** — each headline is placed on the map, categorized, and
+  rated for severity, with a one-line plain-English summary
+- **Breathing visualization** — regions pulse faster the more severe the event
+- **Filters & legend** — show/hide conflict, economy, or nature
+- **Auto-refresh** — the map quietly updates every few minutes
+
+## 🛠️ Tech Stack
+
+- [Next.js](https://nextjs.org/) (App Router) + React + TypeScript
+- [Tailwind CSS](https://tailwindcss.com/) for styling
+- [react-globe.gl](https://github.com/vasturiano/react-globe.gl) + three.js for the 3D globe
+- [Google Gemini](https://ai.google.dev/) for news geocoding, classification & summaries
+- RSS feeds (via `fast-xml-parser`) as the free, unlimited news source
+
+## 🚀 Getting Started
 
 ```bash
+# 1. Install dependencies
+npm install
+
+# 2. Add your free Gemini API key
+echo "GEMINI_API_KEY=your_key_here" > .env.local
+
+# 3. Run the dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Then open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Get a free Gemini API key (no credit card) at
+[Google AI Studio](https://aistudio.google.com/apikey).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🧠 How it works
 
-## Learn More
+1. `/api/news` fetches and de-duplicates the latest headlines from several RSS feeds.
+2. `/api/events` sends those headlines (in parallel batches) to Gemini, which
+   returns each newsworthy item's location, category, severity, and a short
+   summary. Results are cached so the map stays fast and stays within free limits.
+3. The globe plots each event as a glowing, pulsing region you can click to explore.
 
-To learn more about Next.js, take a look at the following resources:
+## 📄 License
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT — feel free to learn from it.
