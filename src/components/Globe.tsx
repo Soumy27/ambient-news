@@ -85,10 +85,10 @@ export default function Globe({ events, onSelect }: GlobeProps) {
       pointsData={events} // the list of events to plot
       pointLat={(d) => (d as NewsEvent).lat} // where (north/south)
       pointLng={(d) => (d as NewsEvent).lng} // where (east/west)
-      pointColor={(d) => TYPE_COLORS[(d as NewsEvent).type]} // red/green/blue
-      pointAltitude={(d) => (d as NewsEvent).severity * 0.06} // taller = worse
-      pointRadius={(d) => 0.25 + (d as NewsEvent).severity * 0.04} // wider = worse
-      pointResolution={12} // how round each dot looks
+      pointColor={(d) => hexToRgba(TYPE_COLORS[(d as NewsEvent).type], 0.5)} // soft glow
+      pointAltitude={0.01} // flat on the surface — no lines sticking out
+      pointRadius={(d) => 0.5 + (d as NewsEvent).severity * 0.18} // bigger glow = worse
+      pointResolution={24} // smooth, round glowing patch
       onPointClick={(point) => onSelect(point as NewsEvent)} // report the click up
       pointLabel={(d) => (d as NewsEvent).city} // tooltip on hover
       // === The pulsing ripples (the "breathing" effect) ===
@@ -100,10 +100,10 @@ export default function Globe({ events, onSelect }: GlobeProps) {
         const color = TYPE_COLORS[(d as NewsEvent).type];
         return (t: number) => hexToRgba(color, 1 - t);
       }}
-      ringMaxRadius={(d) => 2 + (d as NewsEvent).severity * 0.5} // bigger = worse
-      ringPropagationSpeed={3} // how fast each ripple spreads
+      ringMaxRadius={(d) => 3 + (d as NewsEvent).severity * 0.7} // bigger halo = worse
+      ringPropagationSpeed={2} // how fast each ripple spreads
       // More severe events pulse more often (smaller gap between ripples).
-      ringRepeatPeriod={(d) => 2000 - (d as NewsEvent).severity * 130}
+      ringRepeatPeriod={(d) => 2200 - (d as NewsEvent).severity * 130}
     />
   );
 }

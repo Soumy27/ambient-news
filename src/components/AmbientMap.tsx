@@ -6,7 +6,12 @@
 import { useEffect, useState } from "react";
 import Globe from "./Globe";
 import SidePanel from "./SidePanel";
-import { EVENTS as SAMPLE_EVENTS, type NewsEvent } from "@/data/events";
+import Legend from "./Legend";
+import {
+  EVENTS as SAMPLE_EVENTS,
+  type EventType,
+  type NewsEvent,
+} from "@/data/events";
 
 export default function AmbientMap() {
   // The events to show on the globe (starts empty).
@@ -15,6 +20,20 @@ export default function AmbientMap() {
   const [loading, setLoading] = useState(true);
   // Which event is currently selected (null = none).
   const [selected, setSelected] = useState<NewsEvent | null>(null);
+  // Which event types are currently switched on in the filter.
+  const [active, setActive] = useState<Record<EventType, boolean>>({
+    conflict: true,
+    economy: true,
+    nature: true,
+  });
+
+  // Flip one type on or off when its filter chip is clicked.
+  function toggleType(type: EventType) {
+    setActive((prev) => ({ ...prev, [type]: !prev[type] }));
+  }
+
+  // Only show events whose type is currently switched on.
+  const visibleEvents = events.filter((e) => active[e.type]);
 
   // When the page first loads, fetch the live AI-placed events.
   useEffect(() => {
@@ -42,8 +61,9 @@ export default function AmbientMap() {
 
   return (
     <>
-      <Globe events={events} onSelect={setSelected} />
+      <Globe events={visibleEvents} onSelect={setSelected} />
       <SidePanel event={selected} onClose={() => setSelected(null)} />
+      <Legend active={active} onToggle={toggleType} />
 
       {/* A gentle loading message while the AI reads the world. */}
       {loading && (
