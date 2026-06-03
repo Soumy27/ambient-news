@@ -83,20 +83,20 @@ export default function Globe({ events, onSelect }: GlobeProps) {
       atmosphereAltitude={0.18}
       // === The glowing news dots ===
       pointsData={events} // the list of events to plot
-      pointLat={(d) => (d as NewsEvent).lat} // where (north/south)
-      pointLng={(d) => (d as NewsEvent).lng} // where (east/west)
-      pointColor={(d) => hexToRgba(TYPE_COLORS[(d as NewsEvent).type], 0.5)} // soft glow
+      pointLat={(d: object) => (d as NewsEvent).lat} // where (north/south)
+      pointLng={(d: object) => (d as NewsEvent).lng} // where (east/west)
+      pointColor={(d: object) => hexToRgba(TYPE_COLORS[(d as NewsEvent).type], 0.5)} // soft glow
       pointAltitude={0.01} // flat on the surface — no lines sticking out
       pointRadius={(d) => 0.5 + (d as NewsEvent).severity * 0.18} // bigger glow = worse
       pointResolution={24} // smooth, round glowing patch
-      onPointClick={(point) => onSelect(point as NewsEvent)} // report the click up
-      pointLabel={(d) => (d as NewsEvent).city} // tooltip on hover
+      onPointClick={(point: object) => onSelect(point as NewsEvent)} // report the click up
+      pointLabel={(d: object) => (d as NewsEvent).city} // tooltip on hover
       // === The pulsing ripples (the "breathing" effect) ===
       ringsData={events} // one set of ripples per event
-      ringLat={(d) => (d as NewsEvent).lat}
-      ringLng={(d) => (d as NewsEvent).lng}
+      ringLat={(d: object) => (d as NewsEvent).lat}
+      ringLng={(d: object) => (d as NewsEvent).lng}
       // Each ripple starts bright and fades to invisible as it grows (t: 0→1).
-      ringColor={(d) => {
+      ringColor={(d: object) => {
         const color = TYPE_COLORS[(d as NewsEvent).type];
         return (t: number) => hexToRgba(color, 1 - t);
       }}
