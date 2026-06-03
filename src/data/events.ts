@@ -16,6 +16,8 @@ export interface NewsEvent {
   type: EventType; // conflict, economy, or nature
   severity: number; // how serious, from 1 (minor) to 10 (huge)
   headline: string; // a short summary of the event
+  link?: string; // (optional) URL to the full article
+  source?: string; // (optional) where it came from, e.g. "BBC"
 }
 
 // The color each event type glows on the map.
