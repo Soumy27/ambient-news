@@ -19,6 +19,9 @@ export type ClassifiedEvent = {
 // Set up Gemini using the secret key from .env.local.
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
+// flash-lite is fast and has a generous free daily limit.
+const MODEL = "gemini-2.5-flash-lite";
+
 // We tell Gemini the EXACT shape of JSON we want back. This makes its
 // answers reliable and easy to read (no guessing or messy text).
 const responseSchema = {
@@ -57,13 +60,17 @@ export async function classifyHeadlines(
   const numbered = titles.map((t, i) => `${i + 1}. ${t}`).join("\n");
 
   const prompt = `You are a news geographer for a live world map.
-For each headline below, decide if it fits ONE of these categories:
-- "conflict": war, violence, attacks, unrest, crime
-- "economy": markets, business, trade, jobs, money
-- "nature": weather, disasters, climate, earthquakes, environment
+For each headline below, choose the BEST-FITTING of these categories:
+- "conflict": war, violence, attacks, unrest, crime, politics, elections,
+  protests, security, diplomacy, human rights
+- "economy": markets, business, trade, jobs, money, technology, energy,
+  companies, infrastructure
+- "nature": weather, disasters, climate, earthquakes, environment, wildlife,
+  health, science, space
 
-If a headline does NOT clearly fit one of those (e.g. sport, celebrity,
-opinion), SKIP it. For each one you keep, return:
+Be generous: most world news fits one of these. Only SKIP pure sport,
+celebrity gossip, or opinion pieces with no real-world location. Prefer a
+wide spread of countries. For each headline you keep, return:
 - index: the headline's number
 - city + country: the single most relevant place
 - lat + lng: that place's coordinates (decimal degrees)
@@ -74,25 +81,33 @@ opinion), SKIP it. For each one you keep, return:
 Headlines:
 ${numbered}`;
 
-  const res = await ai.models.generateContent({
-    model: "gemini-2.5-flash",
-    contents: prompt,
-    config: {
-      responseMimeType: "application/json",
-      responseSchema,
-    },
-  });
+  // Try up to 3 times. If the AI is briefly rate-limited, wait and retry;
+  // if it ultimately fails, return an empty list so the map still works.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      const res = await ai.models.generateContent({
+        model: MODEL,
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema,
+        },
+      });
 
-  // Gemini hands back JSON text; turn it into a real list and sanity-check it.
-  try {
-    const parsed = JSON.parse(res.text ?? "[]") as ClassifiedEvent[];
-    return parsed.filter(
-      (e) =>
-        typeof e.lat === "number" &&
-        typeof e.lng === "number" &&
-        ["conflict", "economy", "nature"].includes(e.type),
-    );
-  } catch {
-    return [];
+      const parsed = JSON.parse(res.text ?? "[]") as ClassifiedEvent[];
+      return parsed.filter(
+        (e) =>
+          typeof e.lat === "number" &&
+          typeof e.lng === "number" &&
+          ["conflict", "economy", "nature"].includes(e.type),
+      );
+    } catch {
+      // Wait a bit longer each retry (2s, then 4s) before trying again.
+      if (attempt < 2) {
+        await new Promise((resolve) => setTimeout(resolve, 2000 * (attempt + 1)));
+      }
+    }
   }
+
+  return []; // gave up on this chunk; don't crash the whole map
 }

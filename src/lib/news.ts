@@ -3,10 +3,18 @@
 
 import { XMLParser } from "fast-xml-parser";
 
+// A spread of free world feeds, including BBC's regional editions so we get
+// news from every part of the globe (not just the big Western headlines).
 const FEEDS = [
   { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/africa/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/asia/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/europe/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml" },
   { source: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml" },
   { source: "NYT", url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml" },
+  { source: "The Guardian", url: "https://www.theguardian.com/world/rss" },
 ];
 
 export type Article = {
@@ -37,8 +45,17 @@ async function fetchFeed(source: string, url: string): Promise<Article[]> {
   }
 }
 
-// Fetch all feeds at once and return one combined list of articles.
+// Fetch all feeds at once, then return one combined list with duplicates
+// removed (the same story often appears in several feeds).
 export async function fetchArticles(): Promise<Article[]> {
   const results = await Promise.all(FEEDS.map((f) => fetchFeed(f.source, f.url)));
-  return results.flat().filter((a) => a.title.length > 0);
+
+  const seen = new Set<string>();
+  return results.flat().filter((a) => {
+    if (a.title.length === 0) return false;
+    const key = a.title.toLowerCase();
+    if (seen.has(key)) return false; // skip a title we've already kept
+    seen.add(key);
+    return true;
+  });
 }
