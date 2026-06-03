@@ -20,6 +20,8 @@ export default function AmbientMap() {
   const [loading, setLoading] = useState(true);
   // Which event is currently selected (null = none).
   const [selected, setSelected] = useState<NewsEvent | null>(null);
+  // When we last refreshed the news (null until the first load finishes).
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   // Which event types are currently switched on in the filter.
   const [active, setActive] = useState<Record<EventType, boolean>>({
     conflict: true,
@@ -35,27 +37,32 @@ export default function AmbientMap() {
   // Only show events whose type is currently switched on.
   const visibleEvents = events.filter((e) => active[e.type]);
 
-  // When the page first loads, fetch the live AI-placed events.
+  // Fetch the live AI events on load, then refresh every 5 minutes.
   useEffect(() => {
-    let active = true; // guard against updating after the page is gone
+    let isMounted = true; // guard against updating after the page is gone
 
     async function loadEvents() {
       try {
         const res = await fetch("/api/events");
         const data = await res.json();
-        if (!active) return;
+        if (!isMounted) return;
         // If the AI returned events, use them; otherwise fall back to samples.
         setEvents(data.events?.length ? data.events : SAMPLE_EVENTS);
+        setLastUpdated(new Date());
       } catch {
-        if (active) setEvents(SAMPLE_EVENTS); // network/AI failed: show samples
+        if (isMounted) setEvents(SAMPLE_EVENTS); // network/AI failed: samples
       } finally {
-        if (active) setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
 
-    loadEvents();
+    loadEvents(); // first load
+    // Refresh in the background every 5 minutes to keep the map current.
+    const timer = setInterval(loadEvents, 5 * 60 * 1000);
+
     return () => {
-      active = false;
+      isMounted = false;
+      clearInterval(timer); // stop refreshing when the page goes away
     };
   }, []);
 
@@ -64,6 +71,18 @@ export default function AmbientMap() {
       <Globe events={visibleEvents} onSelect={setSelected} />
       <SidePanel event={selected} onClose={() => setSelected(null)} />
       <Legend active={active} onToggle={toggleType} />
+
+      {/* A subtle "live" indicator showing when the news last refreshed. */}
+      {lastUpdated && (
+        <div className="absolute right-6 top-6 z-10 flex items-center gap-2 text-xs text-zinc-400">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-green-400" />
+          Updated{" "}
+          {lastUpdated.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })}
+        </div>
+      )}
 
       {/* A gentle loading message while the AI reads the world. */}
       {loading && (
