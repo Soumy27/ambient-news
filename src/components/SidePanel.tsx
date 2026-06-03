@@ -75,6 +75,23 @@ export default function SidePanel({ event, onClose }: SidePanelProps) {
           <p className="mt-6 text-lg leading-relaxed text-zinc-200">
             {event.headline}
           </p>
+
+          {/* The source and a link to the full article, if we have one. */}
+          {event.link && (
+            <div className="mt-6 border-t border-white/10 pt-4">
+              {event.source && (
+                <p className="text-sm text-zinc-500">Source: {event.source}</p>
+              )}
+              <a
+                href={event.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-2 inline-block text-sm font-semibold text-sky-400 hover:text-sky-300"
+              >
+                Read full story →
+              </a>
+            </div>
+          )}
         </div>
       )}
     </aside>

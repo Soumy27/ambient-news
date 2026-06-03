@@ -7,7 +7,7 @@
 import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 import type { GlobeMethods } from "react-globe.gl";
-import { EVENTS, TYPE_COLORS, type NewsEvent } from "@/data/events";
+import { TYPE_COLORS, type NewsEvent } from "@/data/events";
 
 // react-globe.gl uses the browser's `window`, which doesn't exist on the
 // server. So we load it lazily and tell Next.js: "only in the browser"
@@ -26,10 +26,11 @@ function hexToRgba(hex: string, alpha: number) {
 
 // The settings (props) this component accepts from its parent.
 type GlobeProps = {
+  events: NewsEvent[]; // the events to plot on the globe
   onSelect: (event: NewsEvent) => void; // called when a beacon is clicked
 };
 
-export default function Globe({ onSelect }: GlobeProps) {
+export default function Globe({ events, onSelect }: GlobeProps) {
   // A "remote control" handle to the globe, so we can tell it to spin.
   const globeRef = useRef<GlobeMethods | undefined>(undefined);
 
@@ -81,7 +82,7 @@ export default function Globe({ onSelect }: GlobeProps) {
       atmosphereColor="#3a7bd5"
       atmosphereAltitude={0.18}
       // === The glowing news dots ===
-      pointsData={EVENTS} // the list of events to plot
+      pointsData={events} // the list of events to plot
       pointLat={(d) => (d as NewsEvent).lat} // where (north/south)
       pointLng={(d) => (d as NewsEvent).lng} // where (east/west)
       pointColor={(d) => TYPE_COLORS[(d as NewsEvent).type]} // red/green/blue
@@ -91,7 +92,7 @@ export default function Globe({ onSelect }: GlobeProps) {
       onPointClick={(point) => onSelect(point as NewsEvent)} // report the click up
       pointLabel={(d) => (d as NewsEvent).city} // tooltip on hover
       // === The pulsing ripples (the "breathing" effect) ===
-      ringsData={EVENTS} // one set of ripples per event
+      ringsData={events} // one set of ripples per event
       ringLat={(d) => (d as NewsEvent).lat}
       ringLng={(d) => (d as NewsEvent).lng}
       // Each ripple starts bright and fades to invisible as it grows (t: 0→1).
