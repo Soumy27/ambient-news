@@ -12,8 +12,15 @@ const FEEDS = [
   { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/europe/rss.xml" },
   { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/latin_america/rss.xml" },
   { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/middle_east/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/world/us_and_canada/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/business/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/technology/rss.xml" },
+  { source: "BBC", url: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml" },
   { source: "Al Jazeera", url: "https://www.aljazeera.com/xml/rss/all.xml" },
   { source: "NYT", url: "https://rss.nytimes.com/services/xml/rss/nyt/World.xml" },
+  { source: "NYT", url: "https://rss.nytimes.com/services/xml/rss/nyt/Africa.xml" },
+  { source: "NYT", url: "https://rss.nytimes.com/services/xml/rss/nyt/AsiaPacific.xml" },
+  { source: "NPR", url: "https://feeds.npr.org/1004/rss.xml" },
   { source: "The Guardian", url: "https://www.theguardian.com/world/rss" },
 ];
 

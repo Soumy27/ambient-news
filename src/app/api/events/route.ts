@@ -9,8 +9,8 @@ import { fetchArticles } from "@/lib/news";
 import { classifyHeadlines } from "@/lib/classify";
 import type { NewsEvent } from "@/data/events";
 
-const MAX_HEADLINES = 72; // how many headlines to process in total
-const CHUNK_SIZE = 18; // headlines per AI call (4 parallel calls) for speed
+const MAX_HEADLINES = 110; // how many headlines to process in total
+const CHUNK_SIZE = 22; // headlines per AI call (5 parallel calls) for speed
 const CACHE_MS = 30 * 60 * 1000; // remember the result for 30 minutes
 
 // The saved copy: the events and the time we made them (null = none yet).
