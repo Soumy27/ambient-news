@@ -102,9 +102,11 @@ ${numbered}`;
           ["conflict", "economy", "nature"].includes(e.type),
       );
     } catch {
-      // Wait a bit longer each retry (2s, then 4s) before trying again.
+      // When the AI is rate-limited it asks us to wait ~20 seconds, so short
+      // retries are useless. Back off properly: 5s, then 15s.
       if (attempt < 2) {
-        await new Promise((resolve) => setTimeout(resolve, 2000 * (attempt + 1)));
+        const waitMs = attempt === 0 ? 5000 : 15000;
+        await new Promise((resolve) => setTimeout(resolve, waitMs));
       }
     }
   }
